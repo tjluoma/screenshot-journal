@@ -6,6 +6,41 @@
 # Web: 	http://RhymesWithDiploma.com
 # Date:	2013-07-10
 
+	# If you are NOT using Keyboard Maestro and ARE using `beengone` (see
+	# below), how many MINUTES before the user is considered IDLE ? Default
+	# is 5 minutes:
+	# 	BEENGONE='5'
+BEENGONE='5'
+
+	# BEENGONE will not be used unless PREFER_KEYBOARD_MAESTRO='no'
+	# If you don't want to use Keyboard Maestro (even if it is installed) set PREFER_KEYBOARD_MAESTRO to 'no'
+	# (obviously Keyboard Maestro can't be used if it's not installed)
+PREFER_KEYBOARD_MAESTRO='no'
+
+
+
+
+
+
+####|####|####|####|####|####|####|####|####|####|####|####|####|####|####
+#
+#		You should not HAVE to change anything below this line but you are encouraged to read the rest of the comments to understand how it works
+#
+
+
+
+if [ "$PREFER_KEYBOARD_MAESTRO" != "no" ]
+then
+			# if Keyboard Maestro is found in /Applications/ it will be preferred over BEENGONE
+		if [ -e "/Applications/Keyboard Maestro.app" ]
+		then
+				PREFER_KEYBOARD_MAESTRO='yes'
+		else
+				PREFER_KEYBOARD_MAESTRO='no'
+		fi
+fi
+
+
 zmodload zsh/datetime 	# needed for strftime
 
 NAME="$0:t:r"
@@ -22,6 +57,9 @@ FILEPATH=$(strftime "$HOME/Pictures/$NAME/%Y-%m-%d/%H.%M.%S" "$EPOCHSECONDS")
 
 	# If the necessary folder is not available, it will be created automatically. MAGIC. Ok, not magic.
 [[ -d "$FILEPATH:h" ]] || mkdir -p "$FILEPATH:h"
+
+	# initialize variable
+STATUS="Active"
 
 case "$1" in
 	--sleep)
@@ -43,27 +81,40 @@ case "$1" in
 	;;
 esac
 
-	# if we have not been told we are idle, assume we are active
-[[ "$STATUS" != "idle" ]] && STATUS=active
+	# If the status is NOT `idle` and if we have been told NOT to prefer
+	# Keyboard Maestro, then we'll look for `beengone` which you will have
+	# to download and install separately from the URL below:
+	# http://brettterpstra.com/2013/02/10/beengone-a-script-friendly-way-to-check-computer-idle-time/
+if [ "$STATUS" != "idle" -a "$PREFER_KEYBOARD_MAESTRO" = "no" ]
+then
+	if (( $+commands[beengone] ))
+	then
+				# if the beengone command exists AND we have met the criteria for it, set STATUS='idle'
+ 			beengone $BEENGONE >/dev/null && STATUS='idle'
+	fi
+fi
 
-	# gif screenshots will take the least about of diskspace and they're fine for our purposes
-SCREENCAPTURE_FORMAT='gif'
 
-	# We don't need high res, we just want a reminder
-IMAGESNAP_FORMAT='gif'
 
+		# Only take a screenshot when NOT idle
 if [ "$STATUS" != "idle" ]
 then
-		# Only take a screenshot when the screensaver is OFF and the display is ON (otherwise, why bother?)
+
+		# gif screenshots will take the least about of diskspace and they're fine for our purposes
+	SCREENCAPTURE_FORMAT='gif'
 
 		# -x = no sound, -t = format (gif, jpg, etc), -C = include cursor
 	/usr/sbin/screencapture -x -t "$SCREENCAPTURE_FORMAT" -C "${FILEPATH}.screen.${STATUS}.${SCREENCAPTURE_FORMAT}"
-
 fi
+
+
 
 ## BEGIN IMAGESNAP
 if (( $+commands[imagesnap] ))
 then
+			# We don't need high res, we just want a reminder
+		IMAGESNAP_FORMAT='gif'
+
 		[[ "$STATUS" == "idle" ]] && imagesnap -q "${FILEPATH}.isight.${STATUS}.${IMAGESNAP_FORMAT}"
 
 			# if 'imagesnap' is found in your $PATH then an iSight picture

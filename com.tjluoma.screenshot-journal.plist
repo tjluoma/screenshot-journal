@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.tjluoma.screenshot-journal</string>
+	<key>LowPriorityIO</key>
+	<true/>
+	<key>Nice</key>
+	<integer>10</integer>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/env</string>
+		<string>screenshot-journal.sh</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+	<string>/tmp/screenshot-journal.stderr.txt</string>
+	<key>StandardOutPath</key>
+	<string>/tmp/screenshot-journal.stdout.txt</string>
+	<key>StartInterval</key>
+	<integer>60</integer>
+	<key>ThrottleInterval</key>
+	<integer>30</integer>
+</dict>
+</plist>
