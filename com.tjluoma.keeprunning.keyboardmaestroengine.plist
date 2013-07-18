@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>KeepAlive</key>
+	<dict>
+		<key>PathState</key>
+		<dict>
+			<key>/Applications/Keyboard Maestro.app</key>
+			<true/>
+		</dict>
+		<key>SuccessfulExit</key>
+		<false/>
+	</dict>
+	<key>Label</key>
+	<string>com.tjluoma.keeprunning.keyboardmaestroengine</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Applications/Keyboard Maestro.app/Contents/Resources/Keyboard Maestro Engine.app/Contents/MacOS/Keyboard Maestro Engine</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>
