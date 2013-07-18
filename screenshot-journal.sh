@@ -6,60 +6,45 @@
 # Web: 	http://RhymesWithDiploma.com
 # Date:	2013-07-10
 
+	##############################################################################################
 	# If you are NOT using Keyboard Maestro and ARE using `beengone` (see
 	# below), how many MINUTES before the user is considered IDLE ? Default
 	# is 5 minutes:
+	#
 	# 	BEENGONE='5'
 BEENGONE='5'
-
-	# BEENGONE will not be used unless PREFER_KEYBOARD_MAESTRO='no'
-	# If you don't want to use Keyboard Maestro (even if it is installed) set PREFER_KEYBOARD_MAESTRO to 'no'
-	# (obviously Keyboard Maestro can't be used if it's not installed)
-PREFER_KEYBOARD_MAESTRO='no'
-
-
 
 
 
 
 ####|####|####|####|####|####|####|####|####|####|####|####|####|####|####
 #
-#		You should not HAVE to change anything below this line but you are encouraged to read the rest of the comments to understand how it works
+#		You should not HAVE to change anything below this line but you are
+#		encouraged to read the rest of the comments to understand how it
+#		works. Or how I think it is supposed to work :-)
 #
 
-
-
-if [ "$PREFER_KEYBOARD_MAESTRO" != "no" ]
-then
-			# if Keyboard Maestro is found in /Applications/ it will be preferred over BEENGONE
-		if [ -e "/Applications/Keyboard Maestro.app" ]
-		then
-				PREFER_KEYBOARD_MAESTRO='yes'
-		else
-				PREFER_KEYBOARD_MAESTRO='no'
-		fi
-fi
 
 
 zmodload zsh/datetime 	# needed for strftime
 
 NAME="$0:t:r"
 
-## 	FILEPATH becomes something like:
-##  "~/Pictures/screenshot-journal/2013-06-23/20.58.52."
-## 	which gives us a foundation to build on for filenames.
-##
-## 	Each day's pictures are stored in a folder YYYY-MM-DD and the
-## 	individual files are timestamps HH:MM:SS using 24-hour time because
-## 	it sorts cleaner in the Finder
+		## 	FILEPATH becomes something like:
+		##  "~/Pictures/screenshot-journal/2013-06-23/20.58.52."
+		## 	which gives us a foundation to build on for filenames.
+		##
+		## 	Each day's pictures are stored in a folder YYYY-MM-DD and the
+		## 	individual files are timestamps HH:MM:SS using 24-hour time because
+		## 	it sorts cleaner in the Finder
 
 FILEPATH=$(strftime "$HOME/Pictures/$NAME/%Y-%m-%d/%H.%M.%S" "$EPOCHSECONDS")
 
 	# If the necessary folder is not available, it will be created automatically. MAGIC. Ok, not magic.
 [[ -d "$FILEPATH:h" ]] || mkdir -p "$FILEPATH:h"
 
-	# initialize variable
-STATUS="Active"
+	# initialize variable… we don't know what our STATUS is unless we're told or we calculate it using `beengone`
+STATUS="Unknown"
 
 case "$1" in
 	--sleep)
@@ -74,29 +59,56 @@ case "$1" in
 					exit 0
 	;;
 
-	--screensaver)
+	--idle)
 						# Keyboard Maestro will use that flag for when the screensaver is on OR when the display is turned off.
 						# Might not need a screenshot then.
 					STATUS='idle'
 	;;
+
+	--active)
+						# Keyboard Maestro will use that flag for when the screensaver is OFF AND when the display is turned ON
+						# Might not need a screenshot then.
+					STATUS='active'
+	;;
 esac
 
-	# If the status is NOT `idle` and if we have been told NOT to prefer
-	# Keyboard Maestro, then we'll look for `beengone` which you will have
-	# to download and install separately from the URL below:
-	# http://brettterpstra.com/2013/02/10/beengone-a-script-friendly-way-to-check-computer-idle-time/
-if [ "$STATUS" != "idle" -a "$PREFER_KEYBOARD_MAESTRO" = "no" ]
+####|####|####|####|####|####|####|####|####|####|####|####|####|####|####
+#
+#		Are we being called from launchd?
+#
+#		If we are being called from launchd (instead of Keyboard Maestro) then we will use `beengone` to tell us if we are idle or not
+#		Note that we don't use this section if the script has been called with --active or --idle
+
+if [[ "$STATUS" == "Unknown" ]]
 then
-	if (( $+commands[beengone] ))
-	then
-				# if the beengone command exists AND we have met the criteria for it, set STATUS='idle'
- 			beengone $BEENGONE >/dev/null && STATUS='idle'
-	fi
-fi
+
+	PARENT=$(/bin/ps -p $PPID)
+
+	case "$PARENT" in
+		*/sbin/launchd)
+								# IF we are in launchd (and, therefore, not being called via Keyboard Maestro),
+								# then we will use the `beengone` command, if available, to check our status against the
+								# user defined $BEENGONE
+							if (( $+commands[beengone] ))
+							then
+									# if the beengone command exists AND we have met the criteria for it, set STATUS='idle'
+									beengone $BEENGONE >/dev/null && STATUS='idle'
+							fi
+			;;
+
+		*)
+						# this is something else (not launchd)
+						# Not sure what this might be useful for in the
+						# future, but might as well leave it here in case
+						# something comes to mind.
+						:
+		;;
+	esac
+fi # If status is NOT idle
+###############################################
 
 
-
-		# Only take a screenshot when NOT idle
+		# Only take a screenshot when NOT idle (either Active or Unknown)
 if [ "$STATUS" != "idle" ]
 then
 
@@ -108,7 +120,7 @@ then
 fi
 
 
-
+###############################################
 ## BEGIN IMAGESNAP
 if (( $+commands[imagesnap] ))
 then
@@ -137,8 +149,9 @@ then
 			# or `brew install imagesnap`
 fi
 ## END IMAGESNAP
+###############################################
 
-
+###############################################
 ## BEGIN SETFILE
 if (( $+commands[SetFile] ))
 then
@@ -153,7 +166,7 @@ then
 
 fi
 ## END SETFILE
-
+###############################################
 
 
 exit

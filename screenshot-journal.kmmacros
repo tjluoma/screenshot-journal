@@ -55,9 +55,9 @@
 								<key>MacroActionType</key>
 								<string>ExecuteShellScript</string>
 								<key>Path</key>
-								<string>/usr/local/bin/screenshot-journal.sh</string>
+								<string>/Users/luomat/Dropbox/bin/screenshot-journal.sh</string>
 								<key>Text</key>
-								<string></string>
+								<string>/usr/bin/env screenshot-journal.sh --active</string>
 								<key>TimeOutAbortsMacro</key>
 								<true/>
 								<key>TrimResults</key>
@@ -65,7 +65,7 @@
 								<key>TrimResultsNew</key>
 								<true/>
 								<key>UseText</key>
-								<false/>
+								<true/>
 							</dict>
 						</array>
 						<key>IsActive</key>
@@ -100,7 +100,7 @@
 								<key>Path</key>
 								<string></string>
 								<key>Text</key>
-								<string>/usr/local/bin/screenshot-journal.sh --screensaver</string>
+								<string>/usr/bin/env screenshot-journal.sh --idle</string>
 								<key>TimeOutAbortsMacro</key>
 								<true/>
 								<key>TrimResults</key>
@@ -116,11 +116,11 @@
 					</dict>
 				</array>
 				<key>IsActive</key>
-				<true/>
+				<false/>
 				<key>ModificationDate</key>
-				<real>395855258.71916199</real>
+				<real>395870803.05829298</real>
 				<key>Name</key>
-				<string>Screenshot What Was I Doing</string>
+				<string>Screenshot Journal</string>
 				<key>Triggers</key>
 				<array>
 					<dict>
