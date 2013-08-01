@@ -120,9 +120,14 @@ case "$1" in
 	;;
 esac
 
-WHICH_APP="$1"
+if [ "$#" -gt "0" ]
+then
 
-shift
+	WHICH_APP="$1"
+
+	shift
+fi
+
 
 WHICH_WINDOW="$@"
 
@@ -170,7 +175,7 @@ then
 	SCREENCAPTURE_FORMAT='gif'
 
 		# -x = no sound, -t = format (gif, jpg, etc), -C = include cursor
-	/usr/sbin/screencapture -x -t "$SCREENCAPTURE_FORMAT" -C "${FILEPATH} \"${WHICH_APP}\" «$WHICH_WINDOW» ${REASON}.${SCREENCAPTURE_FORMAT}"
+	/usr/sbin/screencapture -x -t "$SCREENCAPTURE_FORMAT" -C "${FILEPATH}	 [${WHICH_APP}]	 {$WHICH_WINDOW}	 ${REASON}.${SCREENCAPTURE_FORMAT}"
 fi
 
 

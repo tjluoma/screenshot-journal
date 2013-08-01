@@ -31,58 +31,83 @@ I find this more helpful than just knowing how long I spent in a particular app 
 
 Having a screenshot library of the day also means that I have  a chance of remembering things based on vague visual memory.  I often myself wishing I could go back and find something that I read online, but can't remember if it was Twitter or Tumblr or RSS or something else. "If I could just see it again I'd remember it." If I was looking at it for more than a minute, I have a screenshot of it. I
 
-Once a minute isn't frequent enough to catch *everything* of course, but it is the digital equivalent of breadcrumbs, and it's a good place to start. I've experimented with shorter and longer times but I keep coming back to one image per minute. 
+Once a minute isn't frequent enough to catch *everything* of course, but it is the digital equivalent of breadcrumbs, and it's a good place to start. I've experimented with shorter and longer times but I keep coming back to one image per minute.
 
 I have also added a *second* script which is triggered whenever an app takes focus, more on that below.
 
 
 ### Two Options ###
 
-This script was originally designed to work with [Keyboard Maestro] for the simple reason that it works *better* in Keyboard Maestro. The script can provide more information coming from Keyboard Maestro, and Keyboard Maestro can also automatically detect when the screensaver is running *or* when your Mac's display is turned off. That means that Keyboard Maestro can prevent the script from taking a screenshot when all you're going to get is a blank screen. [^ScreenIsOff] 
+This script was originally designed to work with [Keyboard Maestro] for the simple reason that it works *better* in Keyboard Maestro. The script can provide more information coming from Keyboard Maestro, and Keyboard Maestro can also automatically detect when the screensaver is running *or* when your Mac's display is turned off. That means that Keyboard Maestro can prevent the script from taking a screenshot when all you're going to get is a blank screen. [^ScreenIsOff]
 
 That being said, I realize that some people can't or won't go for Keyboard Maestro, I have added a second option using `launchd`. (Note that you should only choose one of these options, not both.)
 
+Screenshots will be saved to **$HOME/Pictures/screenshot-journal/.** Inside that folder a new folder will automatically be created for each day. The format for those folders is YYYY-MM-DD which makes it easy to sort them in Finder.
+
+
+
 ### Option #1: Keyboard Maestro
 
-Setting this up in Keyboard Maestro is simple.
+Setting this up in Keyboard Maestro is simple. *(Note: I've only tested this with Keyboard Maestro version 6, but it may work with 5).*
 
-1. Download [screenshot-journal.sh] 
-2. Save it somewhere in your $PATH such as /usr/local/bin/ 
+1. Download [screenshot-journal.sh]
+2. Save it somewhere in your $PATH such as /usr/local/bin/
 3. Make sure it is executable (`chmod 755 screenshot-journal.sh`)
-4. Download [screenshot-journal.kmmacros] and double click the file to import it into Keyboard Maestro. *(Note: I've only tested it with Keyboard Maestro version 6, but it may work with 5).*
+4. Download [SSJ-Timed.kmmacros] and double click the file to import it into Keyboard Maestro.
+5. (Optional) Download [SSJ-App-Switch.kmmacros] and double click the file to import it into Keyboard Maestro.
 
-Those four steps are required.[^OptionalKMstep] 
+By default the Keyboard Maestro macro [SSJ-Timed.kmmacros] is set to run once every minute when you are logged, all day long. You can adjust that in the Keyboard Maestro Editor. You can have it run every "X" minutes or seconds, and you can tell it to only run during certain hours, i.e. maybe you only want to track what you do between 9:00 a.m. and 6:00 p.m.[^OptionalKMstep]
 
-By default the Keyboard Maestro macro is set to run once every minute when you are logged, all day long. You can adjust that in the Keyboard Maestro Editor. You can have it run every "X" minutes or seconds, and you can tell it to only run during certain hours, i.e. maybe you only want to track what you do between 9:00 a.m. and 6:00 p.m.
+The macro [SSJ-App-Switch.kmmacros] will run whenever a new app 'activates' (in Keyboard Maestro parlance, aka "takes focus"). This is an optional step which result in more screenshots being taken, but the end result is more complete reconstruction of your day. It's possible that you might switch to an app, write yourself an important note, and then switch back again before [SSJ-Timed.kmmacros] runs.
+
+*N.B:* If you want to be able to track specific websites such as Facebook, I highly recommend creating Site Specific Browsers using [Fluid] and then use [Choosy] to automatically direct clicked links to those browsers. I wrote about this in [A better Google search experience with Choosy, Keyboard Maestro and Fluid] and [Protect yourself from being tracked by Google, Facebook, and others].
 
 
-### Option #2: launchd 
+#### Filenames when used with Keyboard Maestro ####
+
+When using Keyboard Maestro you will get much more descriptive filenames which will include the name of the current front-most app and the current document title (if any).
+
+So, for example, here is one of my most recent entries in today's folder:
+
+	15.18.02 [MultiMarkdown Composer] {TUAW.md} timed.gif
+
+The first set of numbers is the current time (Mac OS X's filesystem does not like colons in filenames, so I use "." instead.) The [brackets] contain the name of the front-most *application* and the {braces} contain the name of the front-most *window,* both of which are recorded by Keyboard Maestro. So, even before I look at the image, I have some idea of what it will show me: it's a screeenshot of when I was writing an article for TUAW using [MultiMarkdown Composer]. 
+
+The word 'timed' means that this screenshot was taken by [SSJ-Timed.kmmacros]. Here is a similar screenshot taken from when I *switched to* MultiMarkdown Composer from another app
+
+	15.37.48 [MultiMarkdown Composer] {TUAW.md} switch.gif
+
+You will notice that this filename ends with "switch" (instead of "timed") indicating this screenshot was taken by [SSJ-App-Switch.kmmacros].
+
+The filenames are designed to be easily sorted in Finder (which will sort them chronologically due to the timestamp as the first part of the filename), as well as easily parsed later on if you want to just find certain apps or certain window names.
+
+(Unix note: the whitespace between the fields is one tab followed by one space.)
+
+### Option #2: launchd
 
 If you can't / won't use Keyboard Maestro for some reason, you *can* use this script from `launchd`.
 
-1. Download [screenshot-journal.sh] 
-2. Save it somewhere in your $PATH such as /usr/local/bin/ 
+1. Download [screenshot-journal.sh]
+2. Save it somewhere in your $PATH such as /usr/local/bin/
 3. Make sure it is executable (chmod 755 screenshot-journal.sh)
 4. Download [com.tjluoma.screenshot-journal.plist] and move it to $HOME/Library/LaunchAgents/
 5. Either restart/logout or load the plist manually using `launchctl`
 
 Those five steps are required. There is one additional optional step: Download [beengone], a free program from our very own [Brett Terpstra] which will tell you how many minutes the user has "been gone" from the computer. If `beengone` is installed, `screenshot-journal.sh` will use it to check to see if the computer is idle. (You can even set the number of minutes before the computer is considered idle just by editing one line in `screenshot-journal.sh`. By default it is 5 minutes.)
 
-### There are a few provisos, a couple of *quid pro quos*.
+Using `launchd` means that you will not be able to add the current app and current window name in the filenames of the screenshots, or take a screenshot whenever you switch apps. For that reason I highly recommend Keyboard Maestro over `launchd` but I include it as another option.
 
-**What happens if the computer *is* idle?**
+### What happens if the computer is idle?
 
-Screenshots will be saved to **$HOME/Pictures/screenshot-journal/.** Inside that folder a new folder will automatically be created for each day. The format for those folders is YYYY-MM-DD which makes it easy to sort them in Finder. 
+If you are using either Keyboard Maestro or `beengone` (meaning the script can tell if you are idle), you can use [imagesnap] to get an image captured from the iSight/FaceTime camera on your Mac, if it has one. 
 
-Inside that "dated" folder will be files named like this: "15.58.02.screen.active.gif" The first three numbers are the hour, minute, and second when the image was captured. This is done using 24-hour time because it makes for much easier sorting in Finder. (Note that Mac OS X's filesystem does not like colons in filenames, which is why I have used dots as separators.)
+I added that so I can see if I was on the phone, or talking to someone in my office, or just not in my office, any of which might provide a clue as to what I was doing when I wasn't using the computer.
 
-The word 'screen' indicates that this is a picture of the screen (more on that in a moment). The last part of the name will either be "active, idle, or unknown" and refers to the status when the image was taken.
-
-If you are using either Keyboard Maestro or `beengone` (meaning the script can tell if you are idle), you can use [imagesnap] to get an image captured from the iSight/FaceTime camera on your Mac, if it has one. I added that so I can see if I was on the phone, or talking to someone in my office, or just not in my office, any of which might provide a clue as to what I was doing when I wasn't using the computer.
+If you don't have [imagesnap] installed, no image will be captured when the computer is known to be idle.
 
 ### What to *do* with this information ###
 
-There's no reason to keep track of this information if you're not going to review it. I suggest taking some time at the end of the day to go through the folder of images. A good way to do this is to find today's folder in **$HOME/Pictures/screenshot-journal** and change to "Cover Flow" (either by pressing ⌘ + 4 or select the "View" menu item and then the "as Cover Flow" option). Then you can use the up and down arrow keys to move through the images, and press the spacebar to take a closer "quick look" view at any particular image.
+There's no reason to keep track of this information if you're not going to review it. I suggest taking some time at the end of the day to go through the folder of images. A good way to do this is to find today's folder in **$HOME/Pictures/screenshot-journal** and change to "Cover Flow" (either by pressing <kbd>⌘</kbd> + <kbd>4</kbd>  or select the "View" menu item and then the "as Cover Flow" option). Then you can use the up and down arrow keys to move through the images, and press the spacebar to take a closer "quick look" view at any particular image.
 
 It may also be helpful to group images into *folders* describing each task, especially if you tend to go back and forth between tasks during the day. Putting all of the images together into one folder will give you an easy way to see how long you spent on a particular task. I was surprised to find that on a day when I thought I had "barely checked email" I had actually spent over 40 minutes in my email client, which might not seem like a lot, but was far more than I would have guessed.
 
@@ -92,23 +117,14 @@ I don't plan to go through every day and make those folders, but it seems like a
 
 ### Hard drive and CPU usage ###
 
-On my 2.13 GHz Core 2 Duo MacBook Air, I do not even notice when the script runs, even when I had it running every 30 seconds. One day I had about 15 *hours* worth of images, with a new image every 30 seconds and it took about 160 MB of hard drive space. After reviewing the images, there's no real need to keep them, so you can just trash the entire folder. The script creates GIF images to minimize disk usage. Obviously if you have a retina MacBook Pro, those images will be larger, but again, this isn't intended as long term storage. 
-
-
-### Secondary Trigger ###
-
-The only missing piece, for me, was when I would switch between apps. I wanted to get a sense of how long I spend in each app, as well as how often I switch between apps. So I created another trigger in Keyboard Maestro which simply triggers anytime an application "activates". It is basically the same Keyboard Maestro macro as above, except that it doesn't bother to check to see if the screensaver is running since, obviously, if I am switching apps, the computer is not idle.
-
-I have also updated the Keyboard Maestro macro so that it saves the current active application name in the filename of the screenshot. Want to know how much time you spent in Safari? Look for all of the filenames that end with '"Safari" timed.gif.' Want to know how many times you switched over to Twitter? Look for all of the filenames with your Twitter client + "switch.gif" (for example, mine all end with '"Tweetbot" switch.gif').
-
-*N.B:* If you want to be able to track specific websites such as Facebook, I highly recommend creating Site Specific Browsers using [Fluid] and then use [Choosy] to automatically direct clicked links to those browsers. I wrote about this in [A better Google search experience with Choosy, Keyboard Maestro and Fluid] and [Protect yourself from being tracked by Google, Facebook, and others].
+On my 2.13 GHz Core 2 Duo MacBook Air, I do not even notice when the script runs, even when I had it running every 30 seconds. One day I had about 15 *hours* worth of images, with a new image every 30 seconds and it took about 160 MB of hard drive space. After reviewing the images, there's no real need to keep them, so you can just trash the entire folder. The script creates GIF images to minimize disk usage. Obviously if you have a retina MacBook Pro, those images will be larger, but again, this isn't intended as long term storage.
 
 
 
 <!-- Footnotes -->
 
 
-[^ScreenIsOff]: While it is pretty easy to check to see if the screen saver is on in a shell script (`ps cx | fgrep ' ScreenSaverEngine'`), I have not found any way to determine the status of your display(s) from a shell script. So if you have Keyboard Maestro, you will definitely want to use it for this. If you don't have it yet, I encourage you to [download the demo] and try it for 30 days. 
+[^ScreenIsOff]: While it is pretty easy to check to see if the screen saver is on in a shell script (`ps cx | fgrep ' ScreenSaverEngine'`), I have not found any way to determine the status of your display(s) from a shell script. So if you have Keyboard Maestro, you will definitely want to use it for this. If you don't have it yet, I encourage you to [download the demo] and try it for 30 days.
 
 
 [^OptionalKMstep]: <img align='right' border="0" src="http://www.blogcdn.com//media/2013/07/keyboardmaestroapppreferences--320x369.jpg" width="320" height="369" alt="Keyboard Maestro preferences" />There is one more which is optional, but highly recommended. [Download this launchd plist] and move it to **$HOME/Library/LaunchAgents/**. That will ensure that the Keyboard Maestro Engine stays running even if it crashes. *If you do this* be sure to go into Keyboard Maestro.app's preferences and turn ***off*** the option to "Launch Engine at Login" (as shown in the image here), otherwise you will get two copies of the Engine trying to start at the same time, which is bad.
@@ -117,15 +133,17 @@ I have also updated the Keyboard Maestro macro so that it saves the current acti
 
 
 
-<!-- Downloads Related to this Article -->
-
-[Download this launchd plist]: https://github.com/tjluoma/screenshot-journal/blob/master/com.tjluoma.keeprunning.keyboardmaestroengine.plist
-
-[com.tjluoma.screenshot-journal.plist]: https://github.com/tjluoma/screenshot-journal/blob/master/com.tjluoma.screenshot-journal.plist
-
-[screenshot-journal.kmmacros]:  https://github.com/tjluoma/screenshot-journal/blob/master/screenshot-journal.kmmacros
+<!-- Github Links for this Script -->
 
 [screenshot-journal.sh]: https://github.com/tjluoma/screenshot-journal/blob/master/screenshot-journal.sh
+
+[Download this launchd plist]: https://github.com/tjluoma/screenshot-journal/blob/master/launchd/com.tjluoma.keeprunning.keyboardmaestroengine.plist
+
+[com.tjluoma.screenshot-journal.plist]: https://github.com/tjluoma/screenshot-journal/blob/master/launchd/com.tjluoma.screenshot-journal.plist
+
+[SSJ-Timed.kmmacros]: https://github.com/tjluoma/screenshot-journal/blob/master/Keyboard-Maestro/SSJ-Timed.kmmacros
+
+[SSJ-App-Switch.kmmacros]: https://github.com/tjluoma/screenshot-journal/blob/master/Keyboard-Maestro/SSJ-App-Switch.kmmacros
 
 
 <!-- OS X apps -->
@@ -139,6 +157,8 @@ I have also updated the Keyboard Maestro macro so that it saves the current acti
 [Keyboard Maestro]: http://KeyboardMaestro.com
 
 [download the demo]: http://www.keyboardmaestro.com/action/download?km-kmi-2-f
+
+[MultiMarkdown Composer]: http://multimarkdown.com/
 
 [TimeSink]: http://manytricks.com/timesink/
 
