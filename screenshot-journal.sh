@@ -5,6 +5,7 @@
 # Mail:	luomat at gmail dot com
 # Web: 	http://RhymesWithDiploma.com
 # Date:	2013-07-10
+NAME="$0:t:r"
 
 	##############################################################################################
 	# If you are NOT using Keyboard Maestro and ARE using `beengone` (see
@@ -14,6 +15,15 @@
 	# 	BEENGONE='5'
 BEENGONE='5'
 
+	# How many days screenshots do you want to keep? This is intended to
+	# keep your folder from getting filled up with screenshots that you
+	# will probably never look at again. Note that folders older than this
+	# number of days will be moved to your ~/.Trash/ not deleted, because
+	# recursively deleting folders in an automated script scares me. Not
+	# unduly. Just the right amount. Call it a healthy respect.
+DAYS_TO_KEEP='7'
+
+DIR="$HOME/Pictures/$NAME/"
 
 
 
@@ -28,7 +38,7 @@ BEENGONE='5'
 
 zmodload zsh/datetime 	# needed for strftime
 
-NAME="$0:t:r"
+
 
 		## 	FILEPATH becomes something like:
 		##  "~/Pictures/screenshot-journal/2013-06-23/20.58.52."
@@ -38,10 +48,38 @@ NAME="$0:t:r"
 		## 	individual files are timestamps HH:MM:SS using 24-hour time because
 		## 	it sorts cleaner in the Finder
 
-FILEPATH=$(strftime "$HOME/Pictures/$NAME/%Y-%m-%d/%H.%M.%S" "$EPOCHSECONDS")
+
+	# Note that this adds a sub-folder based on date (i.e. 2012-12-25) and then a filename based on H:M:S (where H=0-23)
+FILEPATH=$(strftime "$DIR/%Y-%m-%d/%H.%M.%S" "$EPOCHSECONDS")
 
 	# If the necessary folder is not available, it will be created automatically. MAGIC. Ok, not magic.
-[[ -d "$FILEPATH:h" ]] || mkdir -p "$FILEPATH:h"
+if [[ ! -d "$FILEPATH:h" ]]
+then
+		mkdir -p "$FILEPATH:h" || echo "$NAME: Failed to create"
+
+		# now, if we're making a new directory, it (most likely) means that
+		# this is a new day, so this is a good time to do some housekeeping
+
+			# look for a 'today' link, and remove it if it exists (only if it matches name 'Today' and is a link)
+		find -H "$DIR" -type l -iname Today -maxdepth 1 -mindepth 0 -print -delete
+
+			# make a new link for 'today' which links to (wait for it) today's folder
+		ln -s "$FILEPATH:h" "$DIR/Today"
+
+		# look for old folders, and move them to the Trash if they exceed DAYS_TO_KEEP
+
+		OLD_FOLDERS=$(find "${DIR}" -ctime +${DAYS_TO_KEEP}d -type d -maxdepth 1 -mindepth 1 -exec mv -vf {} "$HOME/.Trash/" \; | wc -l | tr -dc '[0-9]')
+
+		if [ "$OLD_FOLDERS" != "0" ]
+		then
+				if [ "$OLD_FOLDERS" = "1" ]
+				then
+						echo "$NAME: Moved one folder from $DIR to Trash"
+				else
+						echo "$NAME: moved $OLD_FOLDERS folders from $DIR to Trash"
+				fi
+		fi
+fi
 
 	# initialize variable… we don't know what our STATUS is unless we're told or we calculate it using `beengone`
 STATUS="Unknown"
@@ -62,15 +100,31 @@ case "$1" in
 	--idle)
 						# Keyboard Maestro will use that flag for when the screensaver is on OR when the display is turned off.
 						# Might not need a screenshot then.
+					shift
 					STATUS='idle'
 	;;
 
-	--active)
+	--timed)
 						# Keyboard Maestro will use that flag for when the screensaver is OFF AND when the display is turned ON
 						# Might not need a screenshot then.
 					STATUS='active'
+					REASON='timed'
+					shift
+	;;
+
+	--switch)
+						# Keyboard Maestro will use that flag for whenever a new app has become active
+					STATUS='active'
+					REASON='switch'
+					shift
 	;;
 esac
+
+WHICH_APP="$1"
+
+shift
+
+WHICH_WINDOW="$@"
 
 ####|####|####|####|####|####|####|####|####|####|####|####|####|####|####
 #
@@ -116,7 +170,7 @@ then
 	SCREENCAPTURE_FORMAT='gif'
 
 		# -x = no sound, -t = format (gif, jpg, etc), -C = include cursor
-	/usr/sbin/screencapture -x -t "$SCREENCAPTURE_FORMAT" -C "${FILEPATH}.screen.${STATUS}.${SCREENCAPTURE_FORMAT}"
+	/usr/sbin/screencapture -x -t "$SCREENCAPTURE_FORMAT" -C "${FILEPATH} \"${WHICH_APP}\" «$WHICH_WINDOW» ${REASON}.${SCREENCAPTURE_FORMAT}"
 fi
 
 
