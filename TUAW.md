@@ -1,4 +1,4 @@
-Terminally Geeky Time Tracking via Screenshots
+# Terminally Geeky Time Tracking via Screenshots
 
 <blockquote class="twitter-tweet"><p>Here’s an eye-opener: a <a href="https://twitter.com/keyboardmaestro">@keyboardmaestro</a> macro which takes a screenshot every 30 seconds. Review at the end of the day to see where it went.</p>&mdash; TJ Luoma (@TJLuoma) <a href="https://twitter.com/TJLuoma/statuses/357882327474515968">July 18, 2013</a></blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
