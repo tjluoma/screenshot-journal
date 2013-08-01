@@ -1,21 +1,24 @@
 # Terminally Geeky Time Tracking via Screenshots
 
-<blockquote class="twitter-tweet"><p>Here’s an eye-opener: a <a href="https://twitter.com/keyboardmaestro">@keyboardmaestro</a> macro which takes a screenshot every 30 seconds. Review at the end of the day to see where it went.</p>&mdash; TJ Luoma (@TJLuoma) <a href="https://twitter.com/TJLuoma/statuses/357882327474515968">July 18, 2013</a></blockquote>
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+I few weeks ago [I shared this on Twitter]: "Here’s an eye-opener: a @keyboardmaestro macro which takes a screenshot every 30 seconds. Review at the end of the day to see where it went." Since then, several people have asked me to share my setup (and a few said it terrified them). It took me awhile to refine it, but I think I finally found a setup that will work for me.
 
-"Where did the time go today?" I suspect this is a question that everyone has asked themselves at some point. It happened to me enough that I decided to start tracking myself. The results have been unsettling, but helpful.
+### The "Why"
 
-I suspect most people have similar problems and similar questions: "What did I spend my time on today? I can think of several different things, but I know I'm forgotten a lot. I was in the middle of something and then someone asked me for something else, and when I went to find the answer to that I realized that I needed to finish this other thing over here, and… Did I start something else in the middle of all this? Oh yeah, that idea I had… I know I started some notes about that somewhere… but where?
+The problem is simple: at the end of the day, I often feel like I accomplished a lot, but can't remember everything I worked on; or, I feel like I was busy all day, but don't have much of a sense of what I actually did. In both cases, it would be helpful to be able to 'rewind' my day and be reminded of what I did.
+
+The big problem is distractions, either internal or external. I find myself going from task to task sometimes without taking as much time as I should to leave myself enough breadcrumbs to get back. I'll start working on one thing, and then remember something else, then someone else asks for something, and in the midst of that something else comes up, and before you know it, the day is gone, and I've spent the day working on things that might have been important (or might not) but never made it to my "to do" list. I can't cross them off as 'completed' and I can't remember what I needed to go back to later.
+
+Another problem is remembering not only what I did, but how much time I spent on each. Saying that I worked on a given project is one thing, but being able to see that I spent 20 minutes on this project and 2 hours on some other diversion is much more useful.
 
 ### "Have you tried…"
 
-Yes. I've tried lots of different ways of keeping track of my time.
-
-I've tried keeping a piece of paper at my desk that I would use to write down everything I did. That worked great… when I remembered to do it. Most of the time I found it distracting to have to stop and write down what I was doing, or what I had just done.
+I've tried lots of different ways of keeping track of my time before this. I've tried keeping a piece of paper at my desk that I would use to write down everything I did. That worked great… when I remembered to do it. Most of the time, I didn't.
 
 I've tried [Day One], I even wrote a script that automatically prompted me to write down what I was doing every 15 minutes. But that just meant more interruptions. I tried making it less intrusive (a Growl notification prompting me to make a note in Day One) but that was still a distraction, and I still didn't do it most of the time.
 
 I've even tried apps specifically for time tracking, such as the excellent [TimeSink]. If you're interested in tracking your time and want something that looks nicer and works more easily than my setup, I would suggest trying out TimeSink. You can demo it for two weeks, and there's a 60-day money-back guarantee. Just because *I* took the nerdy route doesn't mean it's a better way for everyone.
+
+I needed a system that was simpler (requiring no effort to use) as well as more precise, giving me the information that I need to be able to recreate my path through the day.
 
 ### Set It and Forget It ###
 
@@ -55,6 +58,8 @@ Setting this up in Keyboard Maestro is simple. *(Note: I've only tested this wit
 3. Make sure it is executable (`chmod 755 screenshot-journal.sh`)
 4. Download [SSJ-Timed.kmmacros] and double click the file to import it into Keyboard Maestro.
 5. (Optional) Download [SSJ-App-Switch.kmmacros] and double click the file to import it into Keyboard Maestro.
+
+*(You can [see screenshots on Github] if you want to verify they imported correctly.)*
 
 By default the Keyboard Maestro macro [SSJ-Timed.kmmacros] is set to run once every minute when you are logged, all day long. You can adjust that in the Keyboard Maestro Editor. You can have it run every "X" minutes or seconds, and you can tell it to only run during certain hours, i.e. maybe you only want to track what you do between 9:00 a.m. and 6:00 p.m.[^OptionalKMstep]
 
@@ -117,7 +122,21 @@ I don't plan to go through every day and make those folders, but it seems like a
 
 ### Hard drive and CPU usage ###
 
-On my 2.13 GHz Core 2 Duo MacBook Air, I do not even notice when the script runs, even when I had it running every 30 seconds. One day I had about 15 *hours* worth of images, with a new image every 30 seconds and it took about 160 MB of hard drive space. After reviewing the images, there's no real need to keep them, so you can just trash the entire folder. The script creates GIF images to minimize disk usage. Obviously if you have a retina MacBook Pro, those images will be larger, but again, this isn't intended as long term storage.
+On my 2.13 GHz Core 2 Duo MacBook Air, I do not even notice when the script runs, even when I had it running every 30 seconds. One day I had about 15 *hours* worth of images, with a new image every 30 seconds and it took about 160 MB of hard drive space. 
+
+After reviewing the images, there's no real need to keep them, so you can just trash the entire folder. The script creates GIF images to minimize disk usage. Obviously if you have a retina MacBook Pro, those images will be larger, but again, this isn't intended as long term storage.
+
+By default, the script will move old folders to the trash after 7 days. You can change that by editing the line
+
+		DAYS_TO_KEEP='7'
+
+in [screenshot-journal.sh].
+
+Similarly, by default, images will be stored in "$HOME/Pictures/screenshot-journal/" (with sub-folders created using YYYY-MM-DD). You can change that by editing the line:
+
+		DIR="$HOME/Pictures/$NAME/"
+
+(`$NAME` refers to the name of the shell script without the path or extension.)
 
 
 
@@ -178,3 +197,7 @@ On my 2.13 GHz Core 2 Duo MacBook Air, I do not even notice when the script runs
 
 [Protect yourself from being tracked by Google, Facebook, and others]: http://www.tuaw.com/2012/02/23/protect-yourself-from-being-tracked-by-google-facebook-and-oth/
 
+
+[see screenshots on Github]: https://github.com/tjluoma/screenshot-journal/tree/master/images
+
+[I shared this on Twitter]: https://twitter.com/TJLuoma/statuses/357882327474515968
