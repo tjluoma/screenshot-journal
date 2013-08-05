@@ -174,8 +174,42 @@ then
 		# gif screenshots will take the least about of diskspace and they're fine for our purposes
 	SCREENCAPTURE_FORMAT='gif'
 
+	SCREENCAPTURE_IMAGE="${FILEPATH}	 [${WHICH_APP}]	 {$WHICH_WINDOW}	 ${REASON}.${SCREENCAPTURE_FORMAT}"
+
+	if [ "${#SCREENCAPTURE_IMAGE}" -gt "254" ]
+	then
+			# HFS can only handle filenames with 255 characters, so if we
+			# exceed that, we need to trim it down or else screencapture
+			# will not be able to save the filename that we give it
+			#
+			# If this happens, it is almost certainly because
+			# "WHICH_WINDOW" is very, very long. This can happen if you are
+			# viewing a page in Safari with a very long <TITLE> for
+			# instance.
+			#
+			# example:
+			# http://www.amazon.com/The-Descent-Original-Unrated-Blu-ray/dp/B000JJ5F0W
+			#
+			# So, what we want to do is take the character count for all
+			# the rest of the parts of the filename and add them all up,
+			# then we want to subtract that number from 254. The DIFFerence
+			# between those two numbers is how long the WHICH_WINDOW can
+			# be. Note that we need to add some extra 'padding' to
+			# EVERYTHING_ELSE_WC to account for spaces between fields, etc.
+			#
+			# Note: '10' is how many extra spaces I found I needed to add via trial and error.
+		EVERYTHING_ELSE_WC=$(echo "${#FILEPATH} + ${#WHICH_APP} + ${#REASON} + ${#SCREENCAPTURE_FORMAT} + 10" | bc)
+
+		DIFF=$((254 - $EVERYTHING_ELSE_WC))
+
+		WHICH_WINDOW=$(echo "$WHICH_WINDOW" | colrm $DIFF)
+
+		SCREENCAPTURE_IMAGE="${FILEPATH}	 [${WHICH_APP}]	 {$WHICH_WINDOW}	 ${REASON}.${SCREENCAPTURE_FORMAT}"
+
+	fi
+
 		# -x = no sound, -t = format (gif, jpg, etc), -C = include cursor
-	/usr/sbin/screencapture -x -t "$SCREENCAPTURE_FORMAT" -C "${FILEPATH}	 [${WHICH_APP}]	 {$WHICH_WINDOW}	 ${REASON}.${SCREENCAPTURE_FORMAT}"
+	/usr/sbin/screencapture -x -t "$SCREENCAPTURE_FORMAT" -C "$SCREENCAPTURE_IMAGE"
 fi
 
 
@@ -212,18 +246,18 @@ fi
 
 ###############################################
 ## BEGIN SETFILE
-if (( $+commands[SetFile] ))
-then
-
-		# For some reason the screencapture command doesn't like to show
-		# file extensions. This will force them to be visible. If you don't
-		# care about that, feel free to delete this section.
-		#
-		# SetFile is only installed if you have the developer tools installed, IIRC.
-
-	SetFile -a e "$FILEPATH:h"/*
-
-fi
+# if (( $+commands[SetFile] ))
+# then
+#
+# 		# For some reason the screencapture command doesn't like to show
+# 		# file extensions. This will force them to be visible. If you don't
+# 		# care about that, feel free to delete this section.
+# 		#
+# 		# SetFile is only installed if you have the developer tools installed, IIRC.
+#
+# 	SetFile -a e "$SCREENCAPTURE_IMAGE"
+#
+# fi
 ## END SETFILE
 ###############################################
 
